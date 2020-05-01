@@ -4,6 +4,7 @@ from gameobject import GameObject
 from homing_missiles import HomingMissiles
 from rifle import Rifle
 from shield import Shield
+from autoturret import AutoTurret
 
 BLACK = 0, 0, 0
 CYAN = 0, 255, 255
@@ -22,22 +23,25 @@ class MainCharacter(GameObject):
         self.position_ = starting_position
         self.universe_ = universe
 
-        self.font_size_ = 22 
-        self.id_ = self.create_ID()
-        self.max_health_ = 100
-        self.selected_weapon_index_ = 0
-        self.shield_ = Shield(self.position_, 100)
-        self.size_ = 20
-        self.text_antialias_ = 1
-        self.ui_font_ = pygame.font.SysFont("monospace",
-                                            self.font_size_*DRAWING_SCALE)
         self.weapon_label_x_spacing_ = 5
         self.weapon_label_y_spacing_ = 10
+        self.text_antialias_ = 1
+        self.font_size_ = 22 
+        self.ui_font_ = pygame.font.SysFont("monospace",
+                                            self.font_size_*DRAWING_SCALE)
+
+        self.id_ = self.create_ID()
+        self.size_ = 20
+        self.max_health_ = 100
+        self.health_ = self.max_health_
+
+        self.selected_weapon_index_ = 0
+        self.shield_ = Shield(self.position_, 100)
+        self.passive_weapons_ = []
+        #self.passive_weapons_ = [AutoTurret(self.universe_, DRAWING_SCALE)]
         self.weapons_ = [Rifle(self.universe_, DRAWING_SCALE),
                          HomingMissiles(self.universe_, DRAWING_SCALE)]
-
         self.current_weapon_ = self.weapons_[self.selected_weapon_index_]
-        self.health_ = self.max_health_
 
     """
     Access Functions
@@ -74,6 +78,8 @@ class MainCharacter(GameObject):
         self.current_weapon_ = self.weapons_[self.selected_weapon_index_]
         self.current_weapon_.update(events)
         self.shield_.update(events)
+        for passive_weapon in self.passive_weapons_:
+            passive_weapon.update(events)
 
     def update_weapon_selection(self, events):
         for event in events:
@@ -89,6 +95,8 @@ class MainCharacter(GameObject):
     def draw_view(self, screen):
         self.draw_ui(screen)
         self.current_weapon_.draw(screen)
+        for passive_weapon in self.passive_weapons_:
+            passive_weapon.draw(screen)
         
 
     def draw_ui(self, screen):
